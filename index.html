@@ -562,7 +562,8 @@ function collectData() {
   return {
     id: Date.now(),
     num: $('f-num').value || String(history.length + 1).padStart(3, '0'),
-    cliente: $('client-select').value || 'Sin nombre',
+    cliente: clients[$('client-select').value] ? clients[$('client-select').value].name : 'Sin nombre',
+    clienteEmail: clients[$('client-select').value] ? clients[$('client-select').value].email : '',
     contacto: '',
     fecha: $('f-fecha').value,
     obs: $('f-obs').value,
@@ -684,10 +685,140 @@ function shareWhatsApp() {
   closeShare();
 }
 
+function buildInvoiceHTML(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'}) : '—';
+  const invoiceItems = d.items.filter(i => i.section !== 'req');
+  const sections = [
+    {key:'bowl',label:'Bowls pre-hechos'},
+    {key:'tabaco',label:'Tabaco suelto'},
+    {key:'cons',label:'Consumibles'},
+    {key:'lease',label:'Lease'},
+  ];
+  let rows = '';
+  sections.forEach(sec => {
+    const secItems = invoiceItems.filter(i => i.section === sec.key);
+    if (!secItems.length) return;
+    rows += `<tr><td colspan="4" style="padding:10px 8px 4px;font-size:11px;letter-spacing:1px;color:#C85A00;text-transform:uppercase;border-bottom:none;">${sec.label}</td></tr>`;
+    secItems.forEach(i => {
+      rows += `<tr><td style="padding:7px 8px;border-bottom:1px solid #2a1c0a;">${i.desc}</td><td style="padding:7px 8px;text-align:center;border-bottom:1px solid #2a1c0a;">${i.q}</td><td style="padding:7px 8px;text-align:center;border-bottom:1px solid #2a1c0a;">$${i.price.toFixed(2)}</td><td style="padding:7px 8px;text-align:right;border-bottom:1px solid #2a1c0a;">$${(i.q*i.price).toFixed(2)}</td></tr>`;
+    });
+  });
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#1a1008;border-radius:12px;overflow:hidden;">
+  <tr><td style="background:#0e0a04;padding:28px;text-align:center;border-bottom:2px solid #C85A00;">
+    <div style="font-size:28px;color:#C85A00;font-weight:bold;letter-spacing:2px;">H2OYO HOOKAS LLC</div>
+    <div style="font-size:12px;color:#6a5040;margin-top:4px;letter-spacing:1px;">HOOKAH DISTRIBUTION SYSTEM · MIAMI, FL</div>
+    <div style="font-size:13px;color:#a89070;margin-top:10px;">Recibo No. ${d.num}</div>
+  </td></tr>
+  <tr><td style="padding:20px 28px;border-bottom:1px solid #2a1c0a;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="50%" style="vertical-align:top;">
+          <div style="font-size:10px;color:#6a5040;letter-spacing:1px;text-transform:uppercase;">Establecimiento</div>
+          <div style="font-size:16px;color:#f0e8d8;margin-top:4px;font-weight:bold;">${d.cliente}</div>
+        </td>
+        <td width="50%" style="vertical-align:top;text-align:right;">
+          <div style="font-size:10px;color:#6a5040;letter-spacing:1px;text-transform:uppercase;">Fecha</div>
+          <div style="font-size:14px;color:#f0e8d8;margin-top:4px;">${fechaStr}</div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:20px 28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#f0e8d8;">
+      <tr style="border-bottom:1px solid #C85A00;">
+        <th style="text-align:left;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">DESCRIPCIÓN</th>
+        <th style="text-align:center;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">CANT.</th>
+        <th style="text-align:center;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">PRECIO</th>
+        <th style="text-align:right;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">TOTAL</th>
+      </tr>
+      ${rows}
+    </table>
+  </td></tr>
+  <tr><td style="padding:16px 28px 24px;border-top:2px solid #C85A00;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="font-size:14px;color:#a89070;">Total a cobrar</td>
+        <td style="text-align:right;font-size:28px;color:#C85A00;font-weight:bold;">$${d.total.toFixed(2)}</td>
+      </tr>
+    </table>
+  </td></tr>
+  ${d.obs ? `<tr><td style="padding:0 28px 20px;font-size:12px;color:#6a5040;font-style:italic;">Obs: ${d.obs}</td></tr>` : ''}
+  <tr><td style="background:#0e0a04;padding:16px 28px;text-align:center;border-top:1px solid #2a1c0a;">
+    <div style="font-size:11px;color:#6a5040;">Formas de pago: Efectivo · Zelle · Venmo · Transferencia</div>
+    <div style="font-size:10px;color:#3a2810;margin-top:6px;">H2OYO Hookas LLC · Miami, Florida</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
+function buildReqHTML(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'}) : '—';
+  const bowlRows = (d.bowlItems||[]).map(i => `<tr><td style="padding:8px;border-bottom:1px solid #2a1c0a;color:#f0e8d8;">${i.sabor}</td><td style="padding:8px;text-align:center;border-bottom:1px solid #2a1c0a;color:#D4960A;font-weight:bold;">${i.qty}</td></tr>`).join('');
+  const tabRows = (d.tabacoItems||[]).map(i => `<tr><td style="padding:8px;border-bottom:1px solid #2a1c0a;color:#f0e8d8;">${i.sabor}</td><td style="padding:8px;text-align:center;border-bottom:1px solid #2a1c0a;color:#D4960A;font-weight:bold;">${i.qty}</td></tr>`).join('');
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#1a1008;border-radius:12px;overflow:hidden;">
+  <tr><td style="background:#0e0a04;padding:24px 28px;border-bottom:2px solid #D4960A;">
+    <div style="font-size:22px;color:#C85A00;font-weight:bold;">H2OYO HOOKAS LLC</div>
+    <div style="font-size:13px;color:#D4960A;margin-top:4px;letter-spacing:1px;">REQUISICIÓN DE PRODUCCIÓN</div>
+  </td></tr>
+  <tr><td style="padding:20px 28px;border-bottom:1px solid #2a1c0a;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td><div style="font-size:11px;color:#6a5040;letter-spacing:1px;">CLIENTE</div><div style="font-size:15px;color:#f0e8d8;margin-top:4px;">${d.cliente}</div></td>
+        <td style="text-align:right;"><div style="font-size:11px;color:#6a5040;letter-spacing:1px;">FECHA</div><div style="font-size:14px;color:#f0e8d8;margin-top:4px;">${fechaStr}</div></td>
+      </tr>
+    </table>
+  </td></tr>
+  ${bowlRows ? `<tr><td style="padding:16px 28px 0;">
+    <div style="font-size:10px;color:#D4960A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Bowls a producir</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+      <tr><th style="text-align:left;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">SABOR</th><th style="text-align:center;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">CANTIDAD</th></tr>
+      ${bowlRows}
+    </table>
+  </td></tr>` : ''}
+  ${tabRows ? `<tr><td style="padding:16px 28px 0;">
+    <div style="font-size:10px;color:#D4960A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Tabaco suelto a preparar</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+      <tr><th style="text-align:left;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">SABOR</th><th style="text-align:center;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">PORCIONES</th></tr>
+      ${tabRows}
+    </table>
+  </td></tr>` : ''}
+  <tr><td style="background:#0e0a04;padding:14px 28px;text-align:center;border-top:1px solid #2a1c0a;margin-top:20px;">
+    <div style="font-size:10px;color:#3a2810;">Recibo No. ${d.num} · H2OYO Hookas LLC</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
 function shareEmail() {
   if (!currentReceipt) return;
-  const text = buildShareText(currentReceipt).replace(/\*/g, '');
-  window.open(`mailto:?subject=${encodeURIComponent(`Recibo H2OYO — ${currentReceipt.cliente} — No. ${currentReceipt.num}`)}&body=${encodeURIComponent(text)}`, '_blank');
+  const d = currentReceipt;
+  const clientEmail = d.clienteEmail || '';
+  const invoiceSubject = encodeURIComponent(`Recibo H2OYO No. ${d.num} — ${d.cliente}`);
+  const reqSubject = encodeURIComponent(`Requisición de producción — ${d.cliente} — Recibo No. ${d.num}`);
+  const invoiceBody = encodeURIComponent(`Estimado cliente,\n\nAdjunto encontrará el detalle de su recibo No. ${d.num}.\n\nTotal: $${d.total.toFixed(2)}\n\nH2OYO Hookas LLC`);
+  const reqBody = encodeURIComponent(buildShareText(d).replace(/\*/g,''));
+
+  if (clientEmail) {
+    window.open(`mailto:${clientEmail}?subject=${invoiceSubject}&body=${invoiceBody}`, '_blank');
+    setTimeout(() => {
+      window.open(`mailto:h2oyo.hookahs@gmail.com?subject=${reqSubject}&body=${reqBody}`, '_blank');
+    }, 1000);
+  } else {
+    window.open(`mailto:?subject=${invoiceSubject}&body=${invoiceBody}`, '_blank');
+    setTimeout(() => {
+      window.open(`mailto:h2oyo.hookahs@gmail.com?subject=${reqSubject}&body=${reqBody}`, '_blank');
+    }, 1000);
+  }
   closeShare();
 }
 
@@ -741,7 +872,11 @@ function resetForm() {
 
 
 // CLIENT MANAGEMENT
-let clients = JSON.parse(localStorage.getItem('h2oyo_clients') || '["Bar Example","Rooftop Miami","Lounge Brickell"]');
+let clients = JSON.parse(localStorage.getItem('h2oyo_clients') || JSON.stringify([
+  {name:"Bar Example", email:"bar@example.com"},
+  {name:"Rooftop Miami", email:"rooftop@example.com"},
+  {name:"Lounge Brickell", email:"lounge@example.com"}
+]));
 
 function saveClients() { localStorage.setItem('h2oyo_clients', JSON.stringify(clients)); }
 
@@ -749,13 +884,13 @@ function buildClientSelect() {
   const sel = $('client-select');
   const current = sel.value;
   sel.innerHTML = '<option value="">Seleccionar establecimiento...</option>';
-  clients.forEach(c => {
+  clients.forEach((c, i) => {
     const opt = document.createElement('option');
-    opt.value = c;
-    opt.textContent = c;
+    opt.value = i;
+    opt.textContent = c.name;
     sel.appendChild(opt);
   });
-  if (current && clients.includes(current)) sel.value = current;
+  if (current !== '' && clients[current]) sel.value = current;
 }
 
 function onClientSelect() {
@@ -767,7 +902,7 @@ function onClientSelect() {
     sel.classList.add('selected');
     body.classList.remove('form-blocked');
     body.classList.add('form-unblocked');
-    hint.textContent = '✓ ' + val;
+    hint.textContent = '✓ ' + clients[val].name;
     hint.style.color = 'var(--orange)';
   } else {
     sel.classList.remove('selected');
@@ -797,21 +932,27 @@ function renderMgrList() {
   }
   list.innerHTML = clients.map((c, i) => `
     <div class="mgr-item">
-      <span class="mgr-item-name">${c}</span>
+      <div>
+        <div class="mgr-item-name">${c.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.email || 'Sin email'}</div>
+      </div>
       <button class="mgr-del" onclick="removeClient(${i})">×</button>
     </div>`).join('');
 }
 
 function addClient() {
-  const input = $('mgr-input');
-  const name = input.value.trim();
+  const nameInput = $('mgr-input');
+  const emailInput = $('mgr-email-input');
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
   if (!name) return;
-  if (!clients.includes(name)) {
-    clients.push(name);
-    clients.sort();
+  if (!clients.find(c => c.name === name)) {
+    clients.push({name, email});
+    clients.sort((a,b) => a.name.localeCompare(b.name));
     saveClients();
   }
-  input.value = '';
+  nameInput.value = '';
+  emailInput.value = '';
   renderMgrList();
 }
 
@@ -835,9 +976,12 @@ setTimeout(initSig, 200);
     <div class="mgr-modal">
       <div class="mgr-title">Establecimientos</div>
       <div class="mgr-list" id="mgr-list"></div>
-      <div class="mgr-add-row">
-        <input class="mgr-add-input" id="mgr-input" type="text" placeholder="Nombre del establecimiento..." onkeydown="if(event.key==='Enter')addClient()">
-        <button class="mgr-add-btn" onclick="addClient()">+</button>
+      <div class="mgr-add-row" style="flex-direction:column;gap:8px;">
+        <input class="mgr-add-input" id="mgr-input" type="text" placeholder="Nombre del establecimiento...">
+        <div style="display:flex;gap:8px;">
+          <input class="mgr-add-input" id="mgr-email-input" type="email" placeholder="Email del cliente..." style="flex:1;" onkeydown="if(event.key==='Enter')addClient()">
+          <button class="mgr-add-btn" onclick="addClient()">+</button>
+        </div>
       </div>
       <div class="btn-row" style="margin-top:14px;padding-bottom:0;">
         <button class="modal-cancel" onclick="closeMgr()">Cerrar</button>
