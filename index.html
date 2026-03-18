@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="H2OYO">
+<meta name="theme-color" content="#1a1008">
+<title>H2OYO Hookas — Reposición</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #C85A00;
+  --orange-light: #E87020;
+  --orange-dim: rgba(200,90,0,0.12);
+  --gold: #D4960A;
+  --bg: #0e0a04;
+  --bg2: #1a1008;
+  --bg3: #231608;
+  --surface: #2a1c0a;
+  --surface2: #3a2810;
+  --border: rgba(200,90,0,0.2);
+  --border2: rgba(200,90,0,0.35);
+  --text: #f0e8d8;
+  --text2: #a89070;
+  --text3: #6a5040;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; overflow: hidden; }
+
+.shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.topbar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--orange); letter-spacing: 1px; }
+.topbar-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; }
+.topbar-date { font-size: 12px; color: var(--text2); text-align: right; }
+
+.tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.tab { flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; letter-spacing: 0.3px; }
+.tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+.section-label { font-size: 10px; letter-spacing: 1.5px; color: var(--orange); font-weight: 500; text-transform: uppercase; margin: 20px 0 8px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.3px; }
+.field input, .field textarea, .field select {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 10px 12px;
+  outline: none; transition: border 0.2s; -webkit-appearance: none;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--orange); }
+.field textarea { resize: none; height: 72px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* FLAVOR SELECTOR */
+.flavor-selector { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+.selector-row { display: flex; gap: 8px; align-items: stretch; }
+.selector-select { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; outline: none; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C85A00' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.selector-select:focus { border-color: var(--orange); }
+.selector-qty { width: 72px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 10px 8px; text-align: center; outline: none; -webkit-appearance: none; }
+.selector-qty:focus { border-color: var(--orange); }
+.add-btn { background: var(--orange); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 22px; font-family: 'DM Sans', sans-serif; padding: 0 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+.add-btn:active { background: #a34800; transform: scale(0.96); }
+
+/* ADDED ITEMS LIST */
+.items-list { margin-top: 10px; }
+.item-row { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; animation: slideIn 0.2s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.item-info { flex: 1; }
+.item-name { font-size: 14px; color: var(--text); }
+.item-brand { font-size: 11px; color: var(--text3); }
+.item-qty-wrap { display: flex; align-items: center; gap: 6px; }
+.item-qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg3); color: var(--orange); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.item-qty-btn:active { background: var(--surface2); }
+.item-qty-val { font-size: 15px; font-weight: 500; color: var(--text); min-width: 24px; text-align: center; }
+.item-total { font-size: 14px; color: var(--orange-light); font-weight: 500; min-width: 48px; text-align: right; }
+.item-del { width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(200,90,0,0.1); color: var(--orange); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.item-del:active { background: rgba(200,90,0,0.25); }
+.subtotal-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 0; border-top: 1px solid var(--border); margin-top: 4px; }
+.subtotal-label { font-size: 12px; color: var(--text3); }
+.subtotal-val { font-size: 15px; font-weight: 500; color: var(--orange-light); }
+.empty-items { text-align: center; padding: 16px; font-size: 13px; color: var(--text3); }
+
+/* CONSUMIBLES */
+.prod-header { display: grid; grid-template-columns: 1fr 64px 64px 72px; gap: 6px; padding: 0 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.prod-header span { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-align: center; }
+.prod-header span:first-child { text-align: left; }
+.prod-row { display: grid; grid-template-columns: 1fr 64px 64px 72px; gap: 6px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(200,90,0,0.08); }
+.prod-row:last-child { border-bottom: none; }
+.prod-name { font-size: 14px; color: var(--text); }
+.prod-brand { font-size: 11px; color: var(--text3); }
+.prod-price { font-size: 13px; color: var(--text2); text-align: center; }
+.prod-total { font-size: 14px; font-weight: 500; color: var(--orange-light); text-align: center; }
+.num-inp { width: 100%; text-align: center; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 7px 4px; outline: none; -webkit-appearance: none; }
+.num-inp:focus { border-color: var(--orange); }
+
+/* SUMMARY */
+.summary { background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius); padding: 16px; margin-top: 10px; }
+.sum-row { display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; color: var(--text2); }
+.sum-row.divider { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px; }
+.sum-row.grand { font-size: 18px; font-weight: 500; color: var(--text); }
+.sum-row.grand span:last-child { color: var(--orange); font-family: 'Cormorant Garamond', serif; font-size: 22px; }
+
+/* SIGNATURE */
+.sig-wrap { background: var(--bg3); border: 1px dashed var(--border2); border-radius: var(--radius); overflow: hidden; }
+.sig-wrap canvas { display: block; width: 100%; touch-action: none; }
+.sig-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid var(--border); }
+.sig-hint { font-size: 11px; color: var(--text3); }
+.clear-btn { font-size: 12px; color: var(--orange); background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; padding: 4px 8px; }
+
+/* BUTTONS */
+.btn-row { display: flex; gap: 10px; margin-top: 20px; padding-bottom: 30px; }
+.btn { flex: 1; padding: 14px; border-radius: var(--radius); font-size: 15px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text2); transition: all 0.2s; font-weight: 400; }
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--orange); border-color: var(--orange); color: #fff; font-weight: 500; }
+.btn-primary:active { background: #a34800; }
+
+/* RECEIPT */
+.receipt { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.receipt-top { background: var(--bg3); padding: 20px; text-align: center; border-bottom: 1px solid var(--border2); }
+.receipt-logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--orange); font-weight: 600; }
+.receipt-tagline { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; margin-top: 2px; }
+.receipt-num { font-size: 12px; color: var(--text2); margin-top: 8px; }
+.receipt-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; border-bottom: 1px solid var(--border); }
+.meta-item .m-label { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; }
+.meta-item .m-val { font-size: 14px; color: var(--text); margin-top: 2px; }
+.receipt-items { padding: 14px; }
+.r-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.r-table th { color: var(--text3); font-weight: 400; font-size: 11px; letter-spacing: 0.5px; text-align: left; padding: 0 0 8px; border-bottom: 1px solid var(--border); }
+.r-table th:not(:first-child) { text-align: center; }
+.r-table td { padding: 8px 0; color: var(--text); border-bottom: 1px solid rgba(200,90,0,0.07); font-size: 13px; }
+.r-table td:not(:first-child) { text-align: center; color: var(--text2); }
+.r-section-head td { font-size: 10px; letter-spacing: 1px; color: var(--orange); padding-top: 14px; padding-bottom: 4px; text-transform: uppercase; border-bottom: none; }
+.receipt-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px; border-top: 1px solid var(--border2); }
+.receipt-total .label { font-size: 13px; color: var(--text2); }
+.receipt-total .amount { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--orange); font-weight: 600; }
+.receipt-obs { padding: 0 14px 14px; font-size: 12px; color: var(--text3); font-style: italic; }
+.receipt-sigs { display: flex; justify-content: space-between; align-items: flex-end; padding: 14px; border-top: 1px solid var(--border); }
+.sig-block { text-align: center; }
+.sig-block .sig-label { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; margin-top: 4px; }
+
+/* REQUISICION SECTION */
+.req-section { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-top: 10px; }
+.req-title { font-size: 10px; letter-spacing: 1.5px; color: var(--gold); font-weight: 500; text-transform: uppercase; margin-bottom: 10px; }
+.req-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(200,90,0,0.07); font-size: 13px; }
+.req-row:last-child { border-bottom: none; }
+.req-name { color: var(--text); }
+.req-qty { font-weight: 500; color: var(--gold); }
+
+/* HISTORY */
+.hist-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 8px; cursor: pointer; transition: border 0.2s; }
+.hist-item:active { border-color: var(--orange); }
+.hist-item-top { display: flex; justify-content: space-between; align-items: center; }
+.hist-cliente { font-size: 15px; color: var(--text); font-weight: 500; }
+.hist-total { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--orange); }
+.hist-meta { font-size: 12px; color: var(--text3); margin-top: 4px; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+
+/* MODAL */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: flex-end; }
+.modal-bg.open { display: flex; }
+.modal-scroll { width: 100%; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal { background: var(--bg2); border-top: 1px solid var(--border2); border-radius: 20px 20px 0 0; padding: 20px; width: 100%; }
+.modal-title { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 16px; }
+.share-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.share-btn { padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; text-align: center; }
+.share-btn.whatsapp { border-color: #25D366; color: #25D366; }
+.share-btn.email { border-color: var(--gold); color: var(--gold); }
+.modal-cancel { width: 100%; margin-top: 10px; padding: 14px; border-radius: var(--radius); border: none; background: var(--surface2); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer; }
+.badge { display: inline-block; background: var(--orange-dim); color: var(--orange); font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
+
+/* CLIENT SELECTOR */
+.client-gate { background: var(--bg2); border-bottom: 1px solid var(--border2); padding: 12px 16px; flex-shrink: 0; }
+.client-gate-row { display: flex; align-items: center; gap: 10px; }
+.client-select-wrap { flex: 1; position: relative; }
+.client-select { width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 10px 36px 10px 12px; outline: none; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C85A00' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; transition: border 0.2s; }
+.client-select:focus { border-color: var(--orange); }
+.client-select.selected { border-color: var(--orange); color: var(--text); }
+.manage-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 14px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.manage-btn:active { background: var(--surface2); }
+.client-hint { font-size: 11px; color: var(--text3); margin-top: 6px; letter-spacing: 0.3px; }
+.form-blocked { opacity: 0.35; pointer-events: none; user-select: none; transition: opacity 0.3s; }
+.form-unblocked { opacity: 1; pointer-events: all; transition: opacity 0.3s; }
+
+/* MANAGE CLIENTS MODAL */
+.mgr-modal { background: var(--bg2); border-top: 1px solid var(--border2); border-radius: 20px 20px 0 0; padding: 20px; width: 100%; }
+.mgr-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+.mgr-list { max-height: 260px; overflow-y: auto; margin-bottom: 12px; }
+.mgr-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; }
+.mgr-item-name { font-size: 14px; color: var(--text); }
+.mgr-del { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; padding: 0 4px; font-family: 'DM Sans', sans-serif; }
+.mgr-del:active { color: var(--orange); }
+.mgr-add-row { display: flex; gap: 8px; }
+.mgr-add-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 10px 12px; outline: none; }
+.mgr-add-input:focus { border-color: var(--orange); }
+.mgr-add-btn { background: var(--orange); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 20px; padding: 0 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.mgr-add-btn:active { background: #a34800; }
+.mgr-empty { text-align: center; padding: 20px; font-size: 13px; color: var(--text3); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">H2OYO</div>
+      <div class="topbar-sub">Hookah Distribution System</div>
+    </div>
+    <div class="topbar-date" id="topbar-date"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('form')">Nueva reposición</div>
+    <div class="tab" onclick="switchTab('history')">Historial <span class="badge" id="hist-badge">0</span></div>
+  </div>
+
+  <div class="client-gate">
+    <div class="client-gate-row">
+      <div class="client-select-wrap">
+        <select class="client-select" id="client-select" onchange="onClientSelect()">
+          <option value="">Seleccionar establecimiento...</option>
+        </select>
+      </div>
+      <button class="manage-btn" onclick="openMgr()">Gestionar</button>
+    </div>
+    <div class="client-hint" id="client-hint">Selecciona un establecimiento para continuar</div>
+  </div>
+  <div class="content">
+
+    <!-- FORM PAGE -->
+    <div class="page active" id="page-form">
+
+      <div class="field-row" style="margin-bottom:10px;">
+          <div class="field"><label>Fecha de visita</label><input id="f-fecha" type="date"></div>
+          <div class="field"><label>No. de recibo</label><input id="f-num" type="text" placeholder="001"></div>
+        </div>
+
+      <div id="form-body" class="form-blocked">
+      <!-- BOWLS -->
+      <div class="section-label">Bowls pre-hechos consumidos</div>
+      <div class="flavor-selector">
+        <div class="selector-row">
+          <select class="selector-select" id="sel-bowl">
+            <option value="">Seleccionar sabor...</option>
+          </select>
+          <input class="selector-qty" type="number" id="qty-bowl" min="1" value="1" placeholder="Cant.">
+          <button class="add-btn" onclick="addItem('bowl')">+</button>
+        </div>
+        <div class="items-list" id="list-bowl">
+          <div class="empty-items">Agrega bowls por sabor</div>
+        </div>
+        <div class="subtotal-row" id="sub-bowl-wrap" style="display:none;">
+          <span class="subtotal-label">Subtotal bowls</span>
+          <span class="subtotal-val" id="sub-bowl">$0.00</span>
+        </div>
+      </div>
+
+      <!-- TABACO SUELTO -->
+      <div class="section-label">Tabaco suelto — porciones consumidas</div>
+      <div class="flavor-selector">
+        <div class="selector-row">
+          <select class="selector-select" id="sel-tabaco">
+            <option value="">Seleccionar sabor...</option>
+          </select>
+          <input class="selector-qty" type="number" id="qty-tabaco" min="1" value="1" placeholder="Cant.">
+          <button class="add-btn" onclick="addItem('tabaco')">+</button>
+        </div>
+        <div class="items-list" id="list-tabaco">
+          <div class="empty-items">Agrega porciones por sabor</div>
+        </div>
+        <div class="subtotal-row" id="sub-tabaco-wrap" style="display:none;">
+          <span class="subtotal-label">Subtotal tabaco</span>
+          <span class="subtotal-val" id="sub-tabaco">$0.00</span>
+        </div>
+      </div>
+
+      <!-- CONSUMIBLES -->
+      <div class="section-label">Consumibles</div>
+      <div class="card">
+        <div class="prod-header"><span>Producto</span><span>Cant.</span><span>Precio</span><span>Total</span></div>
+        <div class="prod-row">
+          <div><div class="prod-name">Carbón</div><div class="prod-brand">Paquete 72 unidades</div></div>
+          <input class="num-inp" type="number" id="q-carbon" min="0" value="0" oninput="calc()">
+          <div class="prod-price">$8.00</div>
+          <div class="prod-total" id="t-carbon">$0</div>
+        </div>
+        <div class="prod-row">
+          <div><div class="prod-name">Picos desechables</div><div class="prod-brand">Bolsa 50 unidades</div></div>
+          <input class="num-inp" type="number" id="q-picos" min="0" value="0" oninput="calc()">
+          <div class="prod-price">$3.00</div>
+          <div class="prod-total" id="t-picos">$0</div>
+        </div>
+      </div>
+
+      <!-- LEASE -->
+      <div class="section-label">Lease mensual</div>
+      <div class="card">
+        <div class="prod-row">
+          <div><div class="prod-name">Mueble + bandejas</div><div class="prod-brand">Cobro mensual</div></div>
+          <input class="num-inp" type="number" id="q-lease" min="0" max="1" value="0" oninput="calc()">
+          <div class="prod-price">$60.00</div>
+          <div class="prod-total" id="t-lease">$0</div>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary">
+        <div class="sum-row"><span>Bowls pre-hechos</span><span id="s-bowl">$0.00</span></div>
+        <div class="sum-row"><span>Tabaco suelto</span><span id="s-tabaco">$0.00</span></div>
+        <div class="sum-row"><span>Consumibles</span><span id="s-cons">$0.00</span></div>
+        <div class="sum-row"><span>Lease mueble</span><span id="s-lease">$0.00</span></div>
+        <div class="sum-row divider grand"><span>Total a cobrar</span><span id="s-total">$0.00</span></div>
+      </div>
+
+      <div class="section-label">Observaciones</div>
+      <div class="card">
+        <div class="field">
+          <textarea id="f-obs" placeholder="Estado del equipo, notas, incidencias..."></textarea>
+        </div>
+      </div>
+
+      <div class="section-label">Firma del cliente</div>
+      <div class="sig-wrap">
+        <canvas id="sig-canvas" height="120"></canvas>
+        <div class="sig-actions">
+          <span class="sig-hint">Firmar con el dedo o Apple Pencil</span>
+          <button class="clear-btn" onclick="clearSig()">Borrar</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" onclick="resetForm()">Limpiar</button>
+        <button class="btn btn-primary" onclick="saveAndReceipt()">Generar recibo</button>
+      </div>
+      </div><!-- end form-body -->
+    </div>
+
+    <!-- HISTORY PAGE -->
+    <div class="page" id="page-history">
+      <div class="section-label">Recibos guardados</div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-bg" id="receipt-modal">
+  <div class="modal-scroll">
+    <div style="padding:16px;">
+      <div class="receipt" id="receipt-content"></div>
+      <div class="btn-row">
+        <button class="btn" onclick="closeReceipt()">Cerrar</button>
+        <button class="btn" onclick="openShare()" style="flex:0.6;">WhatsApp</button>
+        <button class="btn btn-primary" id="send-btn" onclick="sendEmails()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-bg" id="share-modal">
+  <div class="modal">
+    <div class="modal-title">Compartir por WhatsApp</div>
+    <div class="share-btns" style="grid-template-columns:1fr;">
+      <button class="share-btn whatsapp" onclick="shareWhatsApp()">Enviar por WhatsApp</button>
+    </div>
+    <button class="modal-cancel" onclick="closeShare()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+const SABORES = [
+  { marca: "Eternal Smoke", sabor: "Watermelon Mint" },
+  { marca: "Eternal Smoke", sabor: "Blueberry Mint" },
+  { marca: "Adalya", sabor: "Love 66" },
+  { marca: "Adalya", sabor: "Lady Killer" },
+  { marca: "Adalya", sabor: "Mint" },
+  { marca: "Adalya", sabor: "Blue Melon" },
+  { marca: "Serbetly", sabor: "Passion Fruit" },
+  { marca: "Serbetly", sabor: "Lychee" },
+  { marca: "Al Fakher", sabor: "Double Apple" },
+  { marca: "Al Fakher", sabor: "Mango" },
+];
+
+const PRICES = { bowl: 8, tabaco: 4, carbon: 8, picos: 3, lease: 60 };
+const $ = id => document.getElementById(id);
+
+let bowlItems = [];
+let tabacoItems = [];
+let sigCtx, sigDrawing = false;
+let history = JSON.parse(localStorage.getItem('h2oyo_history') || '[]');
+let currentReceipt = null;
+
+function fmt(n) { return '$' + n.toFixed(2); }
+
+function setDate() {
+  const now = new Date();
+  $('f-fecha').valueAsDate = now;
+  $('topbar-date').textContent = now.toLocaleDateString('es-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function buildSelects() {
+  ['sel-bowl', 'sel-tabaco'].forEach(id => {
+    const sel = $(id);
+    sel.innerHTML = '<option value="">Seleccionar sabor...</option>';
+    SABORES.forEach((s, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = s.sabor;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function addItem(type) {
+  const selId = type === 'bowl' ? 'sel-bowl' : 'sel-tabaco';
+  const qtyId = type === 'bowl' ? 'qty-bowl' : 'qty-tabaco';
+  const sel = $(selId);
+  const qty = parseInt($(qtyId).value) || 1;
+  if (sel.value === '') return;
+
+  const idx = parseInt(sel.value);
+  const s = SABORES[idx];
+  const arr = type === 'bowl' ? bowlItems : tabacoItems;
+  const existing = arr.find(i => i.idx === idx);
+
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    arr.push({ idx, sabor: s.sabor, marca: s.marca, qty });
+  }
+
+  sel.value = '';
+  $(qtyId).value = 1;
+  renderItems(type);
+  calc();
+}
+
+function changeQty(type, idx, delta) {
+  const arr = type === 'bowl' ? bowlItems : tabacoItems;
+  const item = arr.find(i => i.idx === idx);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    const pos = arr.indexOf(item);
+    arr.splice(pos, 1);
+  }
+  renderItems(type);
+  calc();
+}
+
+function removeItem(type, idx) {
+  if (type === 'bowl') bowlItems = bowlItems.filter(i => i.idx !== idx);
+  else tabacoItems = tabacoItems.filter(i => i.idx !== idx);
+  renderItems(type);
+  calc();
+}
+
+function renderItems(type) {
+  const arr = type === 'bowl' ? bowlItems : tabacoItems;
+  const price = type === 'bowl' ? PRICES.bowl : PRICES.tabaco;
+  const listId = type === 'bowl' ? 'list-bowl' : 'list-tabaco';
+  const subWrapId = type === 'bowl' ? 'sub-bowl-wrap' : 'sub-tabaco-wrap';
+  const subValId = type === 'bowl' ? 'sub-bowl' : 'sub-tabaco';
+  const list = $(listId);
+
+  if (arr.length === 0) {
+    list.innerHTML = `<div class="empty-items">${type === 'bowl' ? 'Agrega bowls por sabor' : 'Agrega porciones por sabor'}</div>`;
+    $(subWrapId).style.display = 'none';
+    return;
+  }
+
+  let subtotal = 0;
+  list.innerHTML = arr.map(item => {
+    const t = item.qty * price;
+    subtotal += t;
+    return `<div class="item-row">
+      <div class="item-info">
+        <div class="item-name">${item.sabor}</div>
+        
+      </div>
+      <div class="item-qty-wrap">
+        <button class="item-qty-btn" onclick="changeQty('${type}', ${item.idx}, -1)">−</button>
+        <span class="item-qty-val">${item.qty}</span>
+        <button class="item-qty-btn" onclick="changeQty('${type}', ${item.idx}, 1)">+</button>
+      </div>
+      <div class="item-total">${fmt(t)}</div>
+      <button class="item-del" onclick="removeItem('${type}', ${item.idx})">×</button>
+    </div>`;
+  }).join('');
+
+  $(subWrapId).style.display = 'flex';
+  $(subValId).textContent = fmt(subtotal);
+}
+
+function calc() {
+  const bowlTotal = bowlItems.reduce((a, i) => a + i.qty * PRICES.bowl, 0);
+  const tabacoTotal = tabacoItems.reduce((a, i) => a + i.qty * PRICES.tabaco, 0);
+  const carbon = (+($('q-carbon').value)||0) * PRICES.carbon;
+  const picos = (+($('q-picos').value)||0) * PRICES.picos;
+  const lease = (+($('q-lease').value)||0) * PRICES.lease;
+
+  $('t-carbon').textContent = fmt(carbon);
+  $('t-picos').textContent = fmt(picos);
+  $('t-lease').textContent = fmt(lease);
+  $('s-bowl').textContent = fmt(bowlTotal);
+  $('s-tabaco').textContent = fmt(tabacoTotal);
+  $('s-cons').textContent = fmt(carbon + picos);
+  $('s-lease').textContent = fmt(lease);
+  $('s-total').textContent = fmt(bowlTotal + tabacoTotal + carbon + picos + lease);
+}
+
+function initSig() {
+  const canvas = $('sig-canvas');
+  canvas.width = canvas.offsetWidth || window.innerWidth - 32;
+  sigCtx = canvas.getContext('2d');
+  sigCtx.strokeStyle = '#E87020';
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+  canvas.addEventListener('mousedown', e => { sigDrawing = true; sigCtx.beginPath(); const p = getPos(e); sigCtx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => { if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); });
+  canvas.addEventListener('mouseup', () => sigDrawing = false);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; sigCtx.beginPath(); const p = getPos(e); sigCtx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); }, { passive: false });
+  canvas.addEventListener('touchend', () => sigDrawing = false);
+}
+
+function clearSig() { if (sigCtx) sigCtx.clearRect(0, 0, $('sig-canvas').width, $('sig-canvas').height); }
+
+function collectData() {
+  const items = [];
+
+  if (bowlItems.length > 0) {
+    bowlItems.forEach(i => items.push({ section: 'bowl', desc: `Bowl — ${i.sabor}`, marca: i.marca, q: i.qty, price: PRICES.bowl }));
+  }
+  tabacoItems.forEach(i => items.push({ section: 'tabaco', desc: `Tabaco — ${i.sabor}`, marca: i.marca, q: i.qty, price: PRICES.tabaco }));
+
+  const carbon = +($('q-carbon').value)||0;
+  if (carbon > 0) items.push({ section: 'cons', desc: 'Carbón (paq. 72 unid.)', q: carbon, price: PRICES.carbon });
+  const picos = +($('q-picos').value)||0;
+  if (picos > 0) items.push({ section: 'cons', desc: 'Picos desechables (bolsa 50)', q: picos, price: PRICES.picos });
+  const lease = +($('q-lease').value)||0;
+  if (lease > 0) items.push({ section: 'lease', desc: 'Lease mueble + bandejas', q: 1, price: PRICES.lease });
+
+  const total = items.reduce((a, i) => a + i.q * i.price, 0);
+
+  return {
+    id: Date.now(),
+    num: $('f-num').value || String(history.length + 1).padStart(3, '0'),
+    cliente: clients[$('client-select').value] ? clients[$('client-select').value].name : 'Sin nombre',
+    clienteEmail: clients[$('client-select').value] ? clients[$('client-select').value].email : '',
+    contacto: '',
+    fecha: $('f-fecha').value,
+    obs: $('f-obs').value,
+    items,
+    bowlItems: [...bowlItems],
+    tabacoItems: [...tabacoItems],
+    total,
+    sig: $('sig-canvas').toDataURL(),
+  };
+}
+
+function buildReceiptHTML(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+
+  const sections = [
+    { key: 'bowl', label: 'Bowls pre-hechos' },
+    { key: 'tabaco', label: 'Tabaco suelto' },
+    { key: 'cons', label: 'Consumibles' },
+    { key: 'lease', label: 'Lease' },
+  ];
+
+  let rows = '';
+  sections.forEach(sec => {
+    const secItems = d.items.filter(i => i.section === sec.key);
+    if (secItems.length === 0) return;
+    rows += `<tr class="r-section-head"><td colspan="4">${sec.label}</td></tr>`;
+    secItems.forEach(i => {
+      rows += `<tr><td>${i.desc}</td><td>${i.q}</td><td>${fmt(i.price)}</td><td>${fmt(i.q * i.price)}</td></tr>`;
+    });
+  });
+
+  if (!rows) rows = `<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:16px;">Sin productos registrados</td></tr>`;
+
+  const reqBowls = (d.bowlItems || []).map(i => `<div class="req-row"><span class="req-name">${i.sabor}</span><span class="req-qty">${i.qty} bowls</span></div>`).join('');
+  const reqTabaco = (d.tabacoItems || []).map(i => `<div class="req-row"><span class="req-name">${i.sabor}</span><span class="req-qty">${i.qty} porciones</span></div>`).join('');
+  const hasReq = reqBowls || reqTabaco;
+
+  return `
+    <div class="receipt-top">
+      <div class="receipt-logo">H2OYO Hookas LLC</div>
+      <div class="receipt-tagline">Hookah Distribution System · Miami, FL</div>
+      <div class="receipt-num">Recibo No. ${d.num}</div>
+    </div>
+    <div class="receipt-meta">
+      <div class="meta-item"><div class="m-label">Establecimiento</div><div class="m-val">${d.cliente}</div></div>
+      <div class="meta-item"><div class="m-label">Contacto</div><div class="m-val">${d.contacto || '—'}</div></div>
+      <div class="meta-item"><div class="m-label">Fecha</div><div class="m-val">${fechaStr}</div></div>
+      <div class="meta-item"><div class="m-label">Pago</div><div class="m-val">Efectivo / Zelle / Venmo</div></div>
+    </div>
+    <div class="receipt-items">
+      <table class="r-table">
+        <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Total</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="receipt-total"><span class="label">Total</span><span class="amount">${fmt(d.total)}</span></div>
+    ${d.obs ? `<div class="receipt-obs">Obs: ${d.obs}</div>` : ''}
+    ${hasReq ? `
+    <div style="padding:14px;border-top:1px solid var(--border);">
+      <div class="req-section">
+        <div class="req-title">Requisición de producción</div>
+        ${reqBowls ? `<div style="font-size:11px;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;">BOWLS A PRODUCIR</div>${reqBowls}` : ''}
+        ${reqTabaco ? `<div style="font-size:11px;color:var(--text3);letter-spacing:0.5px;margin:10px 0 6px;">TABACO SUELTO A PREPARAR</div>${reqTabaco}` : ''}
+      </div>
+    </div>` : ''}
+    <div class="receipt-sigs">
+      <div class="sig-block">
+        <img src="${d.sig}" width="160" height="55" style="display:block;border-bottom:1px solid var(--border2);">
+        <div class="sig-label">Firma del cliente</div>
+      </div>
+      <div class="sig-block" style="text-align:right;">
+        <div style="font-size:14px;color:var(--text);font-weight:500;">H2OYO Hookas LLC</div>
+        <div style="font-size:11px;color:var(--text3);">Proveedor</div>
+      </div>
+    </div>`;
+}
+
+function saveAndReceipt() {
+  const data = collectData();
+  currentReceipt = data;
+  history.unshift(data);
+  localStorage.setItem('h2oyo_history', JSON.stringify(history));
+  $('receipt-content').innerHTML = buildReceiptHTML(data);
+  $('receipt-modal').classList.add('open');
+  updateHistBadge();
+}
+
+function closeReceipt() { $('receipt-modal').classList.remove('open'); }
+function openShare() { $('share-modal').classList.add('open'); }
+function closeShare() { $('share-modal').classList.remove('open'); }
+
+function buildShareText(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  let text = `*H2OYO Hookas LLC*\nRecibo No. ${d.num}\n\n`;
+  text += `Establecimiento: ${d.cliente}\nFecha: ${fechaStr}\n\n`;
+  const sections = [
+    { key: 'bowl', label: 'Bowls pre-hechos' },
+    { key: 'tabaco', label: 'Tabaco suelto' },
+    { key: 'cons', label: 'Consumibles' },
+    { key: 'lease', label: 'Lease' },
+  ];
+  sections.forEach(sec => {
+    const secItems = d.items.filter(i => i.section === sec.key);
+    if (secItems.length === 0) return;
+    text += `*${sec.label}:*\n`;
+    secItems.forEach(i => { text += `• ${i.desc} x${i.q} = ${fmt(i.q * i.price)}\n`; });
+    text += '\n';
+  });
+  text += `*Total: ${fmt(d.total)}*\n`;
+  if (d.obs) text += `\nObs: ${d.obs}`;
+  const req = [...(d.bowlItems||[]).map(i=>`• Bowl — ${i.sabor} x${i.qty}`), ...(d.tabacoItems||[]).map(i=>`• Tabaco — ${i.sabor} x${i.qty}`)];
+  if (req.length > 0) text += `\n\n*Requisición producción:*\n${req.join('\n')}`;
+  return text;
+}
+
+function shareWhatsApp() {
+  if (!currentReceipt) return;
+  window.open(`https://wa.me/?text=${encodeURIComponent(buildShareText(currentReceipt))}`, '_blank');
+  closeShare();
+}
+
+function buildInvoiceHTML(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'}) : '—';
+  const invoiceItems = d.items.filter(i => i.section !== 'req');
+  const sections = [
+    {key:'bowl',label:'Bowls pre-hechos'},
+    {key:'tabaco',label:'Tabaco suelto'},
+    {key:'cons',label:'Consumibles'},
+    {key:'lease',label:'Lease'},
+  ];
+  let rows = '';
+  sections.forEach(sec => {
+    const secItems = invoiceItems.filter(i => i.section === sec.key);
+    if (!secItems.length) return;
+    rows += `<tr><td colspan="4" style="padding:10px 8px 4px;font-size:11px;letter-spacing:1px;color:#C85A00;text-transform:uppercase;border-bottom:none;">${sec.label}</td></tr>`;
+    secItems.forEach(i => {
+      rows += `<tr><td style="padding:7px 8px;border-bottom:1px solid #2a1c0a;">${i.desc}</td><td style="padding:7px 8px;text-align:center;border-bottom:1px solid #2a1c0a;">${i.q}</td><td style="padding:7px 8px;text-align:center;border-bottom:1px solid #2a1c0a;">$${i.price.toFixed(2)}</td><td style="padding:7px 8px;text-align:right;border-bottom:1px solid #2a1c0a;">$${(i.q*i.price).toFixed(2)}</td></tr>`;
+    });
+  });
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#1a1008;border-radius:12px;overflow:hidden;">
+  <tr><td style="background:#0e0a04;padding:28px;text-align:center;border-bottom:2px solid #C85A00;">
+    <div style="font-size:28px;color:#C85A00;font-weight:bold;letter-spacing:2px;">H2OYO HOOKAS LLC</div>
+    <div style="font-size:12px;color:#6a5040;margin-top:4px;letter-spacing:1px;">HOOKAH DISTRIBUTION SYSTEM · MIAMI, FL</div>
+    <div style="font-size:13px;color:#a89070;margin-top:10px;">Recibo No. ${d.num}</div>
+  </td></tr>
+  <tr><td style="padding:20px 28px;border-bottom:1px solid #2a1c0a;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="50%" style="vertical-align:top;">
+          <div style="font-size:10px;color:#6a5040;letter-spacing:1px;text-transform:uppercase;">Establecimiento</div>
+          <div style="font-size:16px;color:#f0e8d8;margin-top:4px;font-weight:bold;">${d.cliente}</div>
+        </td>
+        <td width="50%" style="vertical-align:top;text-align:right;">
+          <div style="font-size:10px;color:#6a5040;letter-spacing:1px;text-transform:uppercase;">Fecha</div>
+          <div style="font-size:14px;color:#f0e8d8;margin-top:4px;">${fechaStr}</div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:20px 28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#f0e8d8;">
+      <tr style="border-bottom:1px solid #C85A00;">
+        <th style="text-align:left;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">DESCRIPCIÓN</th>
+        <th style="text-align:center;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">CANT.</th>
+        <th style="text-align:center;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">PRECIO</th>
+        <th style="text-align:right;padding:0 8px 10px;font-size:11px;color:#a89070;font-weight:normal;letter-spacing:1px;">TOTAL</th>
+      </tr>
+      ${rows}
+    </table>
+  </td></tr>
+  <tr><td style="padding:16px 28px 24px;border-top:2px solid #C85A00;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="font-size:14px;color:#a89070;">Total a cobrar</td>
+        <td style="text-align:right;font-size:28px;color:#C85A00;font-weight:bold;">$${d.total.toFixed(2)}</td>
+      </tr>
+    </table>
+  </td></tr>
+  ${d.obs ? `<tr><td style="padding:0 28px 20px;font-size:12px;color:#6a5040;font-style:italic;">Obs: ${d.obs}</td></tr>` : ''}
+  <tr><td style="background:#0e0a04;padding:16px 28px;text-align:center;border-top:1px solid #2a1c0a;">
+    <div style="font-size:11px;color:#6a5040;">Formas de pago: Efectivo · Zelle · Venmo · Transferencia</div>
+    <div style="font-size:10px;color:#3a2810;margin-top:6px;">H2OYO Hookas LLC · Miami, Florida</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
+function buildReqHTML(d) {
+  const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'}) : '—';
+  const bowlRows = (d.bowlItems||[]).map(i => `<tr><td style="padding:8px;border-bottom:1px solid #2a1c0a;color:#f0e8d8;">${i.sabor}</td><td style="padding:8px;text-align:center;border-bottom:1px solid #2a1c0a;color:#D4960A;font-weight:bold;">${i.qty}</td></tr>`).join('');
+  const tabRows = (d.tabacoItems||[]).map(i => `<tr><td style="padding:8px;border-bottom:1px solid #2a1c0a;color:#f0e8d8;">${i.sabor}</td><td style="padding:8px;text-align:center;border-bottom:1px solid #2a1c0a;color:#D4960A;font-weight:bold;">${i.qty}</td></tr>`).join('');
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f0e8;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f0e8;padding:32px 0;">
+<tr><td align="center">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#1a1008;border-radius:12px;overflow:hidden;">
+  <tr><td style="background:#0e0a04;padding:24px 28px;border-bottom:2px solid #D4960A;">
+    <div style="font-size:22px;color:#C85A00;font-weight:bold;">H2OYO HOOKAS LLC</div>
+    <div style="font-size:13px;color:#D4960A;margin-top:4px;letter-spacing:1px;">REQUISICIÓN DE PRODUCCIÓN</div>
+  </td></tr>
+  <tr><td style="padding:20px 28px;border-bottom:1px solid #2a1c0a;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td><div style="font-size:11px;color:#6a5040;letter-spacing:1px;">CLIENTE</div><div style="font-size:15px;color:#f0e8d8;margin-top:4px;">${d.cliente}</div></td>
+        <td style="text-align:right;"><div style="font-size:11px;color:#6a5040;letter-spacing:1px;">FECHA</div><div style="font-size:14px;color:#f0e8d8;margin-top:4px;">${fechaStr}</div></td>
+      </tr>
+    </table>
+  </td></tr>
+  ${bowlRows ? `<tr><td style="padding:16px 28px 0;">
+    <div style="font-size:10px;color:#D4960A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Bowls a producir</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+      <tr><th style="text-align:left;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">SABOR</th><th style="text-align:center;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">CANTIDAD</th></tr>
+      ${bowlRows}
+    </table>
+  </td></tr>` : ''}
+  ${tabRows ? `<tr><td style="padding:16px 28px 0;">
+    <div style="font-size:10px;color:#D4960A;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Tabaco suelto a preparar</div>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+      <tr><th style="text-align:left;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">SABOR</th><th style="text-align:center;padding:0 8px 8px;font-size:10px;color:#6a5040;font-weight:normal;letter-spacing:1px;">PORCIONES</th></tr>
+      ${tabRows}
+    </table>
+  </td></tr>` : ''}
+  <tr><td style="background:#0e0a04;padding:14px 28px;text-align:center;border-top:1px solid #2a1c0a;margin-top:20px;">
+    <div style="font-size:10px;color:#3a2810;">Recibo No. ${d.num} · H2OYO Hookas LLC</div>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
+
+// EMAILJS
+emailjs.init('JICxrzy2jR9xufRUJ');
+
+async function sendEmails() {
+  if (!currentReceipt) return;
+  const d = currentReceipt;
+  const btn = $('send-btn');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  try {
+    await emailjs.send('h2oyo.hookahs', 'template_2c2fwqg', {
+      to_email: d.clienteEmail || '',
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      invoice_html: buildInvoiceHTML(d),
+    });
+
+    await emailjs.send('h2oyo.hookahs', 'template_zymjujg', {
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      req_html: buildReqHTML(d),
+    });
+
+    btn.textContent = '✓ Emails enviados';
+    btn.style.background = '#1a6b1a';
+    btn.style.borderColor = '#1a6b1a';
+    setTimeout(() => {
+      btn.textContent = 'Enviar por email';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }, 3000);
+
+  } catch(err) {
+    console.error(err);
+    btn.textContent = 'Error — reintentar';
+    btn.disabled = false;
+  }
+}
+
+async function shareEmail() {
+  if (!currentReceipt) return;
+  const d = currentReceipt;
+
+  const sendBtn = document.querySelector('.share-btn.email');
+  sendBtn.textContent = 'Enviando...';
+  sendBtn.disabled = true;
+
+  try {
+    // Send invoice to client
+    await emailjs.send('h2oyo.hookahs', 'template_2c2fwqg', {
+      to_email: d.clienteEmail || '',
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      invoice_html: buildInvoiceHTML(d),
+    });
+
+    // Send requisicion to internal
+    await emailjs.send('h2oyo.hookahs', 'template_zymjujg', {
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      req_html: buildReqHTML(d),
+    });
+
+    sendBtn.textContent = '✓ Enviado';
+    sendBtn.style.borderColor = '#25D366';
+    sendBtn.style.color = '#25D366';
+    setTimeout(() => {
+      closeShare();
+      sendBtn.textContent = 'Email';
+      sendBtn.style.borderColor = '';
+      sendBtn.style.color = '';
+      sendBtn.disabled = false;
+    }, 1500);
+
+  } catch(err) {
+    console.error(err);
+    sendBtn.textContent = 'Error — reintentar';
+    sendBtn.disabled = false;
+  }
+}
+
+
+function updateHistBadge() { $('hist-badge').textContent = history.length; }
+
+function renderHistory() {
+  const list = $('hist-list');
+  if (history.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p style="font-size:14px;">Aún no hay recibos guardados.</p></div>`;
+    return;
+  }
+  list.innerHTML = history.map((d, i) => {
+    const fechaStr = d.fecha ? new Date(d.fecha + 'T12:00:00').toLocaleDateString('es-US', { month: 'short', day: 'numeric' }) : '';
+    return `<div class="hist-item" onclick="viewHistItem(${i})">
+      <div class="hist-item-top">
+        <div class="hist-cliente">${d.cliente}</div>
+        <div class="hist-total">${fmt(d.total)}</div>
+      </div>
+      <div class="hist-meta">Recibo #${d.num} · ${fechaStr} · ${d.items.length} producto(s)</div>
+    </div>`;
+  }).join('');
+}
+
+function viewHistItem(i) {
+  currentReceipt = history[i];
+  $('receipt-content').innerHTML = buildReceiptHTML(currentReceipt);
+  $('receipt-modal').classList.add('open');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'form') || (i === 1 && tab === 'history')));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $(`page-${tab}`).classList.add('active');
+  if (tab === 'history') renderHistory();
+}
+
+function resetForm() {
+  bowlItems = [];
+  tabacoItems = [];
+  renderItems('bowl');
+  renderItems('tabaco');
+  document.querySelectorAll('input[type=number]').forEach(i => i.value = i.id.includes('qty') ? 1 : 0);
+  $('client-select').value = '';
+  onClientSelect();
+  $('f-num').value = '';
+  $('f-obs').value = '';
+  clearSig();
+  calc();
+  setDate();
+}
+
+
+// CLIENT MANAGEMENT
+let clients = JSON.parse(localStorage.getItem('h2oyo_clients') || JSON.stringify([
+  {name:"Bar Example", email:"bar@example.com"},
+  {name:"Rooftop Miami", email:"rooftop@example.com"},
+  {name:"Lounge Brickell", email:"lounge@example.com"}
+]));
+
+function saveClients() { localStorage.setItem('h2oyo_clients', JSON.stringify(clients)); }
+
+function buildClientSelect() {
+  const sel = $('client-select');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Seleccionar establecimiento...</option>';
+  clients.forEach((c, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (current !== '' && clients[current]) sel.value = current;
+}
+
+function onClientSelect() {
+  const sel = $('client-select');
+  const val = sel.value;
+  const body = $('form-body');
+  const hint = $('client-hint');
+  if (val) {
+    sel.classList.add('selected');
+    body.classList.remove('form-blocked');
+    body.classList.add('form-unblocked');
+    hint.textContent = '✓ ' + clients[val].name;
+    hint.style.color = 'var(--orange)';
+  } else {
+    sel.classList.remove('selected');
+    body.classList.add('form-blocked');
+    body.classList.remove('form-unblocked');
+    hint.textContent = 'Selecciona un establecimiento para continuar';
+    hint.style.color = 'var(--text3)';
+  }
+}
+
+function openMgr() {
+  renderMgrList();
+  $('mgr-modal').classList.add('open');
+  setTimeout(() => $('mgr-input').focus(), 300);
+}
+
+function closeMgr() {
+  $('mgr-modal').classList.remove('open');
+  buildClientSelect();
+}
+
+function renderMgrList() {
+  const list = $('mgr-list');
+  if (clients.length === 0) {
+    list.innerHTML = '<div class="mgr-empty">No hay establecimientos. Agrega el primero.</div>';
+    return;
+  }
+  list.innerHTML = clients.map((c, i) => `
+    <div class="mgr-item">
+      <div>
+        <div class="mgr-item-name">${c.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.email || 'Sin email'}</div>
+      </div>
+      <button class="mgr-del" onclick="removeClient(${i})">×</button>
+    </div>`).join('');
+}
+
+function addClient() {
+  const nameInput = $('mgr-input');
+  const emailInput = $('mgr-email-input');
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  if (!name) return;
+  if (!clients.find(c => c.name === name)) {
+    clients.push({name, email});
+    clients.sort((a,b) => a.name.localeCompare(b.name));
+    saveClients();
+  }
+  nameInput.value = '';
+  emailInput.value = '';
+  renderMgrList();
+}
+
+function removeClient(i) {
+  clients.splice(i, 1);
+  saveClients();
+  renderMgrList();
+}
+
+buildSelects();
+buildClientSelect();
+setDate();
+calc();
+updateHistBadge();
+setTimeout(initSig, 200);
+</script>
+
+<!-- MANAGE CLIENTS MODAL -->
+<div class="modal-bg" id="mgr-modal">
+  <div class="modal-scroll">
+    <div class="mgr-modal">
+      <div class="mgr-title">Establecimientos</div>
+      <div class="mgr-list" id="mgr-list"></div>
+      <div class="mgr-add-row" style="flex-direction:column;gap:8px;">
+        <input class="mgr-add-input" id="mgr-input" type="text" placeholder="Nombre del establecimiento...">
+        <div style="display:flex;gap:8px;">
+          <input class="mgr-add-input" id="mgr-email-input" type="email" placeholder="Email del cliente..." style="flex:1;" onkeydown="if(event.key==='Enter')addClient()">
+          <button class="mgr-add-btn" onclick="addClient()">+</button>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;padding-bottom:0;">
+        <button class="modal-cancel" onclick="closeMgr()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
