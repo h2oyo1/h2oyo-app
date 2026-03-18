@@ -359,7 +359,8 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       <div class="receipt" id="receipt-content"></div>
       <div class="btn-row">
         <button class="btn" onclick="closeReceipt()">Cerrar</button>
-        <button class="btn btn-primary" onclick="openShare()">Compartir</button>
+        <button class="btn" onclick="openShare()" style="flex:0.6;">WhatsApp</button>
+        <button class="btn btn-primary" id="send-btn" onclick="sendEmails()">Enviar</button>
       </div>
     </div>
   </div>
@@ -368,10 +369,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 <!-- SHARE MODAL -->
 <div class="modal-bg" id="share-modal">
   <div class="modal">
-    <div class="modal-title">Compartir recibo</div>
-    <div class="share-btns">
-      <button class="share-btn whatsapp" onclick="shareWhatsApp()">WhatsApp</button>
-      <button class="share-btn email" onclick="shareEmail()">Email</button>
+    <div class="modal-title">Compartir por WhatsApp</div>
+    <div class="share-btns" style="grid-template-columns:1fr;">
+      <button class="share-btn whatsapp" onclick="shareWhatsApp()">Enviar por WhatsApp</button>
     </div>
     <button class="modal-cancel" onclick="closeShare()">Cancelar</button>
   </div>
@@ -803,6 +803,46 @@ function buildReqHTML(d) {
 
 // EMAILJS
 emailjs.init('JICxrzy2jR9xufRUJ');
+
+async function sendEmails() {
+  if (!currentReceipt) return;
+  const d = currentReceipt;
+  const btn = $('send-btn');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  try {
+    await emailjs.send('h2oyo.hookahs', 'template_2c2fwqg', {
+      to_email: d.clienteEmail || '',
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      invoice_html: buildInvoiceHTML(d),
+    });
+
+    await emailjs.send('h2oyo.hookahs', 'template_zymjujg', {
+      recibo_num: d.num,
+      cliente: d.cliente,
+      name: 'H2OYO Hookas LLC',
+      req_html: buildReqHTML(d),
+    });
+
+    btn.textContent = '✓ Emails enviados';
+    btn.style.background = '#1a6b1a';
+    btn.style.borderColor = '#1a6b1a';
+    setTimeout(() => {
+      btn.textContent = 'Enviar por email';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }, 3000);
+
+  } catch(err) {
+    console.error(err);
+    btn.textContent = 'Error — reintentar';
+    btn.disabled = false;
+  }
+}
 
 async function shareEmail() {
   if (!currentReceipt) return;
